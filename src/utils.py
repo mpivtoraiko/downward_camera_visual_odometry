@@ -10,12 +10,9 @@ class Dims(IntEnum):
 
 
 def ang_norm(angle):
-  two_pi = 2 * np.pi
-  while (angle > np.pi):
-      angle -= two_pi
-  while (angle < -np.pi):
-      angle += two_pi
-  return angle
-
-
-
+    two_pi = 2 * np.pi
+    while angle > np.pi:
+        angle -= two_pi
+    while angle < -np.pi:
+        angle += two_pi
+    return angle

@@ -43,15 +43,14 @@ class VirtualCamera:
             dtype=np.float64,
         )
 
-        self.px_coords_b = None # to be set by capture()
-        self.track = [] # ground truth track
-
+        self.px_coords_b = None  # to be set by capture()
+        self.track = []  # ground truth track
 
     def draw_vehicle_frame(self):
         if self.px_coords_b is None:
             print("Warning: vehicle frame coordinates not set")
             return
-        
+
         out_img = cv2.line(
             self.base_image.copy(),
             (self.px_coords_b[Dims.X, 0], self.px_coords_b[Dims.Y, 0]),
@@ -85,20 +84,14 @@ class VirtualCamera:
         if len(self.track) > 1:
             for i in range(1, len(self.track)):
                 out_img = cv2.line(
-                    out_img,
-                    self.track[i - 1],
-                    self.track[i],
-                    (255, 0, 0),
-                    20,
+                    out_img, self.track[i - 1], self.track[i], (255, 0, 0), 20
                 )
                 out_img = cv2.circle(out_img, self.track[i], 40, (255, 0, 0), -1)
 
         return out_img
-    
-
 
     def capture(self, transform_2d):
-        self.px_coords_b = None   # reset for this run
+        self.px_coords_b = None  # reset for this run
         # Generate a new image by clipping the appropriate subset of the base image
         if self.base_image is None:
             raise ValueError("Error: base image is not loaded")
@@ -147,7 +140,7 @@ class VirtualCamera:
         ):
             print("Warning: image clipping is out of bounds")
             return None
-    
+
         self.track.append((centroid_x, centroid_y))
 
         crop_img = self.base_image[
@@ -155,10 +148,10 @@ class VirtualCamera:
         ]
 
         # TODO: implement a more direct rotation mx estimation
-        #print(transform_2d[1, 0], transform_2d[0, 0])
+        # print(transform_2d[1, 0], transform_2d[0, 0])
         rot_ang_deg = np.rad2deg(np.arctan2(transform_2d[1, 0], transform_2d[0, 0]))
-        #print(transform_2d)
-        #print(rot_ang_deg)
+        # print(transform_2d)
+        # print(rot_ang_deg)
         warp_xform = cv2.getRotationMatrix2D(
             (crop_img.shape[0] / 2, crop_img.shape[1] / 2), rot_ang_deg, 1.0
         )

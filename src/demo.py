@@ -53,7 +53,9 @@ def main():
             if cam_img is None:
                 # couldn't move the camera, maybe out of bounds, revert to the last pose
                 T = T_last.copy()
-                cam_img = vc.capture(T)  # re-capture to reset the camera to the last pose
+                cam_img = vc.capture(
+                    T
+                )  # re-capture to reset the camera to the last pose
                 continue
 
             # run VO
@@ -61,9 +63,7 @@ def main():
             print(vo_xform)
             if vo_xform is not None:
                 Tvo = vo_xform @ Tvo
-                #print(Tvo)
-                
-
+                # print(Tvo)
 
 
 if __name__ == "__main__":
