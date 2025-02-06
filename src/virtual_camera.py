@@ -8,6 +8,7 @@ CAMERA_HEIGHT = 1.0  # meters above ground
 CAMERA_RESOLUTION = (1920, 1080)
 FOCAL_LENGTH = 1000  # in pixels
 
+DRAWING_LINE_WIDTH = 20
 
 BASE_IMAGE_FILENAME = path.join(
     path.dirname(path.abspath(__file__)), "../images/gravel.png"
@@ -56,39 +57,60 @@ class VirtualCamera:
             (self.px_coords_b[Dims.X, 0], self.px_coords_b[Dims.Y, 0]),
             (self.px_coords_b[Dims.X, 1], self.px_coords_b[Dims.Y, 1]),
             (0, 255, 0),
-            10,
+            DRAWING_LINE_WIDTH,
         )
         out_img = cv2.line(
             out_img,
             (self.px_coords_b[Dims.X, 1], self.px_coords_b[Dims.Y, 1]),
             (self.px_coords_b[Dims.X, 2], self.px_coords_b[Dims.Y, 2]),
             (0, 255, 0),
-            10,
+            DRAWING_LINE_WIDTH,
         )
         out_img = cv2.line(
             out_img,
             (self.px_coords_b[Dims.X, 2], self.px_coords_b[Dims.Y, 2]),
             (self.px_coords_b[Dims.X, 3], self.px_coords_b[Dims.Y, 3]),
             (0, 255, 0),
-            10,
+            DRAWING_LINE_WIDTH,
         )
         out_img = cv2.line(
             out_img,
             (self.px_coords_b[Dims.X, 3], self.px_coords_b[Dims.Y, 3]),
             (self.px_coords_b[Dims.X, 0], self.px_coords_b[Dims.Y, 0]),
             (0, 255, 0),
-            10,
+            DRAWING_LINE_WIDTH,
         )
 
         # overlay the ground truth track
         if len(self.track) > 1:
             for i in range(1, len(self.track)):
                 out_img = cv2.line(
-                    out_img, self.track[i - 1], self.track[i], (255, 0, 0), 20
+                    out_img,
+                    self.track[i - 1],
+                    self.track[i],
+                    (255, 0, 0),
+                    DRAWING_LINE_WIDTH,
                 )
-                out_img = cv2.circle(out_img, self.track[i], 40, (255, 0, 0), -1)
 
         return out_img
+
+    def draw_vo_track(self, img, vo_track):
+        if len(vo_track) < 2:
+            return img
+        vo_track = np.array(vo_track).squeeze()[:, :2]
+        vo_track -= np.tile(
+            np.array([[self.half_frame_w, self.half_frame_h]]), (len(vo_track), 1)
+        )
+        vo_track += np.tile(
+            np.array([[self.half_base_frame_w, self.half_base_frame_h]]),
+            (len(vo_track), 1),
+        )
+        vo_track = vo_track.astype(np.int32)
+        for i in range(1, len(vo_track)):
+            img = cv2.line(
+                img, vo_track[i - 1], vo_track[i], (0, 0, 255), DRAWING_LINE_WIDTH
+            )
+        return img
 
     def capture(self, transform_2d):
         self.px_coords_b = None  # reset for this run
@@ -148,10 +170,7 @@ class VirtualCamera:
         ]
 
         # TODO: implement a more direct rotation mx estimation
-        # print(transform_2d[1, 0], transform_2d[0, 0])
         rot_ang_deg = np.rad2deg(np.arctan2(transform_2d[1, 0], transform_2d[0, 0]))
-        # print(transform_2d)
-        # print(rot_ang_deg)
         warp_xform = cv2.getRotationMatrix2D(
             (crop_img.shape[0] / 2, crop_img.shape[1] / 2), rot_ang_deg, 1.0
         )

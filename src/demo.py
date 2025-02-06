@@ -14,8 +14,10 @@ def main():
     T = np.eye(3)
     cam_img = vc.capture(T)
     Tvo = np.eye(3)
+    vo_track = []
     while True:
         base_img = vc.draw_vehicle_frame()
+        base_img = vc.draw_vo_track(base_img, vo_track)
         cv2.imshow("Demo", base_img)
         cv2.imshow("Camera", cam_img)
         key = cv2.waitKey()
@@ -59,15 +61,15 @@ def main():
                 continue
 
             # run VO
-            vo_xform = compute_vo(last_img, cam_img, vc.K)
-            print(vo_xform)
+            vo_xform = compute_vo(last_img, cam_img.copy(), vc.K)
             if vo_xform is not None:
-                Tvo = vo_xform @ Tvo
-                # print(Tvo)
+                Tvo = np.linalg.inv(vo_xform) @ Tvo
+                px_coords_vo = vc.K @ Tvo[:3, 2]
+                vo_track.append(px_coords_vo[:2])
 
 
 if __name__ == "__main__":
     print(
-        "Welcome to our VO demo! Press 'q' to quit, or use the arrow keys to move the camera. Enjoy!"
+        "Welcome to our VO demo! Press 'q' to quit, or use the arrow keys to move the camera."
     )
     main()

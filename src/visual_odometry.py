@@ -3,7 +3,7 @@ import numpy as np
 
 
 MAX_FEATURES = 5000
-visualize = True
+visualize = False
 
 
 def compute_vo(img1_raw, img2_raw, K):
@@ -23,7 +23,11 @@ def compute_vo(img1_raw, img2_raw, K):
         criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03),
     )
     # calculate optical flow
-    p1, st, err = cv2.calcOpticalFlowPyrLK(img1, img2, p0, None, **lk_params)
+    try:
+        p1, st, err = cv2.calcOpticalFlowPyrLK(img1, img2, p0, None, **lk_params)
+    except cv2.error as e:
+        print(f"Error: {e}")
+        return None
 
     # take good points
     good_new = p1[st == 1]
