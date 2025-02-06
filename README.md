@@ -27,6 +27,6 @@ Hit `q` to quit. Enjoy!
 
 ## Discussion
 
-Because the camera looks at the ground (which assume here to be flat), we use sparse optical flow to track features (Lukas-Kanade). As such, it is not quite as robust as more sophisticated methods, such as Structure from Motion involving the Essential matrix computation, but should be faster. 
+Because the camera looks at the ground (which we assume here to be flat), we use sparse optical flow to track features (Lukas-Kanade). As such, it is not quite as robust as more sophisticated methods, such as Structure from Motion involving the Essential matrix computation, but should be faster. 
 
 Further improvement would be doing a better job estimating rotations from optical flow. The provided groundplane texture image of gravel is low on contrast, and we currently lose quite a lot of features during the rotation. As such, OpenCV's affine matrix estimator isn't able to resolve rotations accurately. It would be interesting to investigate if higher-textured surfaces would yield better results, or further tuning of the affine estimator (or a more sophisticated method) would work better.  
